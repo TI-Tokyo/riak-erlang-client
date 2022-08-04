@@ -38,7 +38,7 @@ serialize(QueryText, Interpolations)
     Content = #tsinterpolation{
                  base           = Q,
                  interpolations = serialize_interpolations(Interpolations)},
-    #tsqueryreq{'query' = Content}.
+    #tsqueryreq{query = Content}.
 
 serialize_interpolations(Interpolations) ->
     serialize_interpolations(Interpolations, []).

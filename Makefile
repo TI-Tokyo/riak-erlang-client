@@ -1,6 +1,6 @@
 .PHONY: all lint clean compile deps distclean release docs
 
-REBAR=./rebar3
+REBAR ?= ./rebar3
 
 all: deps compile
 

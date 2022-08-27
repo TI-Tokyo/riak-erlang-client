@@ -3299,7 +3299,10 @@ encode(Msg=#tsputreq{}, true) ->
 encode(Msg=#tsgetreq{}, true) ->
     riak_ttb_codec:encode(Msg);
 encode(Msg=#tsqueryreq{}, true) ->
-    riak_ttb_codec:encode(Msg);
+    error_logger:info_msg("EEEEEE ~p", [Msg]),
+    E = riak_ttb_codec:encode(Msg),
+    error_logger:info_msg("FFFFFF ~p", [Msg]),
+    E;
 encode(Msg, _UseTTB) ->
     riak_pb_codec:encode(Msg).
 

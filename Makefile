@@ -1,6 +1,6 @@
 .PHONY: all lint clean compile deps distclean release docs
 
-REBAR=./rebar3
+REBAR ?= ./rebar3
 
 all: deps compile
 
@@ -32,9 +32,3 @@ endif
 	@git tag --sign -a "$(VERSION)" -m "riak-erlang-client $(VERSION)" --local-user "$(RELEASE_GPG_KEYNAME)"
 	@git push --tags
 	@./tools/build/publish $(VERSION) master 'Riak Erlang Client' 'riak-erlang-client'
-
-
-DIALYZER_APPS = kernel stdlib sasl erts eunit ssl tools crypto \
-       inets public_key syntax_tools compiler
-
-include tools.mk

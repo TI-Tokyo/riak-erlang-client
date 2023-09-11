@@ -2771,8 +2771,9 @@ process_response(#request{msg = #rpbaaefoldfindkeysreq{}},
         {ok, {keys, lists:map(fun unpack_keycount_fun/1, KeysCount)}},
         State};
 process_response(#request{msg = #rpbaaefoldfindtombsreq{}},
-                    #rpbaaefoldkeycountresp{keys_count = KeysNClocks},
+                    #rpbaaefoldkeyvalueresp{response_type = <<"clock">>} = Rsp,
                     State) ->
+    KeysNClocks = Rsp#rpbaaefoldkeyvalueresp.keys_value,
     {reply,
         {ok, {keysclocks, lists:map(fun unpack_keyclock_fun/1, KeysNClocks)}},
         State};

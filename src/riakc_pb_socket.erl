@@ -2771,12 +2771,10 @@ process_response(#request{msg = #rpbaaefoldfindkeysreq{}},
         {ok, {keys, lists:map(fun unpack_keycount_fun/1, KeysCount)}},
         State};
 process_response(#request{msg = #rpbaaefoldfindtombsreq{}},
-                    #rpbaaefoldkeycountresp{keys_count = KeysDH},
+                    #rpbaaefoldkeycountresp{keys_count = KeysNClocks},
                     State) ->
-    %% In this case the integer value in each entry is not a count but a
-    %% delete hash
     {reply,
-        {ok, {keys, lists:map(fun unpack_keycount_fun/1, KeysDH)}},
+        {ok, {keysclocks, lists:map(fun unpack_keyclock_fun/1, KeysNClocks)}},
         State};
 process_response(#request{msg = #rpbaaefoldreaptombsreq{}},
                     #rpbaaefoldkeycountresp{response_type = ReapTag,

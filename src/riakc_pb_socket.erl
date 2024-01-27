@@ -2761,10 +2761,9 @@ process_response(#request{msg = #rpbaaefoldfindkeysreq{}},
         {ok, {keys, lists:map(fun unpack_keycount_fun/1, KeysCount)}},
         State};
 process_response(#request{msg = #rpbaaefoldfindtombsreq{}},
-                    #rpbaaefoldkeyvalueresp{response_type = <<"clock">>} = Rs,
+                    #rpbaaefoldkeyvalueresp{response_type = <<"clock">>} = Rsp,
                     State) ->
-    %% In this case the integer value in each entry is not a count but a
-    %% delete hash
+    KeysNClocks = Rsp#rpbaaefoldkeyvalueresp.keys_value,
     {reply,
         {ok, {keysclocks, lists:map(fun unpack_keyclock_fun/1, KeysNClocks)}},
         State};

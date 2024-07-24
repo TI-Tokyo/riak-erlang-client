@@ -87,6 +87,7 @@
         head | deletedvclock |
         {n_val, pos_integer()} |
         {timeout, pos_integer()} |
+        {node_confirms, non_neg_integer()} |
         {sloppy_quorum, boolean()}.
 
 %% Valid request options for get requests. When `if_modified' is
@@ -101,6 +102,7 @@
         {n_val, pos_integer()} |
         {sloppy_quorum, boolean()} |
         {timeout, pos_integer()} |
+        {node_confirms, non_neg_integer()} |
         asis.
 %% Valid request options for put requests. `return_body' returns the
 %% entire result of storing the object. `return_head' returns the

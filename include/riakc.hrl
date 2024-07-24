@@ -27,14 +27,15 @@
 -define(FIRST_RECONNECT_INTERVAL, 100).
 -define(MAX_RECONNECT_INTERVAL, 30000).
 
--type client_option()  :: queue_if_disconnected |
-                          {queue_if_disconnected, boolean()} |
-                          {connect_timeout, pos_integer()} |
-                          auto_reconnect |
-                          {auto_reconnect, boolean()} |
-                          keepalive |
-                          {keepalive, boolean()}|
-                          {silence_terminate_crash, boolean()}.
+-type client_option() ::
+        queue_if_disconnected |
+        {queue_if_disconnected, boolean()} |
+        {connect_timeout, pos_integer()} |
+        auto_reconnect |
+        {auto_reconnect, boolean()} |
+        keepalive |
+        {keepalive, boolean()}|
+        {silence_terminate_crash, boolean()}.
 %% Options for starting or modifying the connection:
 %% `queue_if_disconnected' when present or true will cause requests to
 %% be queued while the connection is down. `auto_reconnect' when
@@ -59,24 +60,34 @@
         %% Bucket property definitions (incomplete).
 -type bucket_props() :: [bucket_prop()]. %% Bucket properties
 -type quorum() :: non_neg_integer() | one | all | quorum | default.  %% A quorum setting for get/put/delete requests.
--type read_quorum() :: {r, ReadQuorum::quorum()} |
-                       {pr, PrimaryReadQuorum::quorum()}. %% Valid quorum options for get requests.
--type write_quorum() :: {w, WriteQuorum::quorum()} |
-                        {dw, DurableWriteQuorum::quorum()} |
-                        {pw, PrimaryWriteQuorum::quorum()}. %% Valid quorum options for write requests.
--type delete_option() :: delete_quorum()  |
-                      {n_val, pos_integer()} |
-                      {sloppy_quorum, boolean()}.
--type delete_quorum() :: read_quorum() |
-                         write_quorum() |
-                         {rw, ReadWriteQuorum::quorum()}. %% Valid quorum options for delete requests. Note that `rw' is deprecated in Riak 1.0 and later.
--type get_option() :: read_quorum() |
-                      {if_modified, riakc_obj:vclock()} |
-                      {notfound_ok, boolean()} |
-                      {basic_quorum, boolean()} |
-                      head | deletedvclock |
-                      {n_val, pos_integer()} |
-                      {sloppy_quorum, boolean()}.
+-type read_quorum() ::
+        {r, ReadQuorum::quorum()} |
+        {pr, PrimaryReadQuorum::quorum()}.
+        %% Valid quorum options for get requests.
+-type write_quorum() ::
+        {w, WriteQuorum::quorum()} |
+        {dw, DurableWriteQuorum::quorum()} |
+        {pw, PrimaryWriteQuorum::quorum()}.
+%% Valid quorum options for write requests.
+-type delete_option() ::
+        delete_quorum()  |
+        {n_val, pos_integer()} |
+        {timeout, pos_integer()} |
+        {sloppy_quorum, boolean()}.
+-type delete_quorum() ::
+        read_quorum() |
+        write_quorum() |
+        {rw, ReadWriteQuorum::quorum()}.
+        %% Valid quorum options for delete requests. Note that `rw' is deprecated in Riak 1.0 and later.
+-type get_option() ::
+        read_quorum() |
+        {if_modified, riakc_obj:vclock()} |
+        {notfound_ok, boolean()} |
+        {basic_quorum, boolean()} |
+        head | deletedvclock |
+        {n_val, pos_integer()} |
+        {timeout, pos_integer()} |
+        {sloppy_quorum, boolean()}.
 
 %% Valid request options for get requests. When `if_modified' is
 %% specified with a vclock, the request will fail if the object has
@@ -89,6 +100,7 @@
         return_body | return_head | if_not_modified | if_none_match |
         {n_val, pos_integer()} |
         {sloppy_quorum, boolean()} |
+        {timeout, pos_integer()} |
         asis.
 %% Valid request options for put requests. `return_body' returns the
 %% entire result of storing the object. `return_head' returns the
@@ -100,9 +112,10 @@
 -type put_options() :: [put_option()]. %% A list of options for a put request.
 -type search_options() :: [search_option()]. %% A list of options for a search request.
 -type delete_options() :: [delete_option()]. %% A list of options for a delete request.
--type mapred_queryterm() ::  {map, mapred_funterm(), Arg::term(), Accumulate :: boolean()} |
-                             {reduce, mapred_funterm(), Arg::term(),Accumulate :: boolean()} |
-                             {link, Bucket :: riakc_obj:bucket(), Tag :: term(), Accumulate :: boolean()}.
+-type mapred_queryterm() :: 
+        {map, mapred_funterm(), Arg::term(), Accumulate :: boolean()} |
+        {reduce, mapred_funterm(), Arg::term(),Accumulate :: boolean()} |
+        {link, Bucket :: riakc_obj:bucket(), Tag :: term(), Accumulate :: boolean()}.
 %% A MapReduce phase specification. `map' functions operate on single
 %% K/V objects. `reduce' functions operate across collections of
 %% inputs from other phases. `link' is a special type of map phase

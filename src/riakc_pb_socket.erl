@@ -1978,11 +1978,19 @@ aae_erase_keys(Pid,
 %% only), this query would not detect that state. For `object_size' it
 %% means return all keys whose object size is greater than `N'. The
 %% result is a list of pairs `{Key, Count | Size}'
--spec aae_object_stats(pid(),
-                        riakc_obj:bucket(), key_range(),
-                        modified_range()) ->
-                            {ok, {stats, list({Key::atom(), Val::atom() | list()})}} |
-                            {error, any()}.
+-spec aae_object_stats(
+    pid(),
+    riakc_obj:bucket(), key_range(),
+    modified_range()) ->
+        {ok,
+            {stats,
+                list(
+                    {Key::binary(),
+                    Val::non_neg_integer() |
+                        list({Key::binary(), Val::non_neg_integer()})})
+                }
+            } |
+        {error, any()}.
 aae_object_stats(Pid, BucketType, KeyRange, ModifiedRange) ->
     Timeout = default_timeout(aaefold_timeout),
     {KR, SK, EK} =

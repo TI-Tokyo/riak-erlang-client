@@ -164,7 +164,7 @@
                         timeout.
 
 -type continuation() :: 'undefined' | binary().
--type secondary_index_id() :: {binary_index, string()} | {integer_index, string()}.
+-type secondary_index_id() :: {binary_index, string()} | {integer_index, string()} | binary().
 -type index_term() :: integer() | binary().
 -type keys() :: [binary()] | 'undefined'.
 -type index_terms() :: [{index_term(), binary()}] | 'undefined'.

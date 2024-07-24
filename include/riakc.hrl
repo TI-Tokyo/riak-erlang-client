@@ -84,9 +84,12 @@
 %% returned. When `deletedvclock' is specified, the vector clock of
 %% the tombstone will be returned if the object has been recently
 %% deleted.
--type put_option() :: write_quorum() | return_body | return_head | if_not_modified | if_none_match |
-                      {n_val, pos_integer()} |
-                      {sloppy_quorum, boolean()}.
+-type put_option() ::
+        write_quorum() |
+        return_body | return_head | if_not_modified | if_none_match |
+        {n_val, pos_integer()} |
+        {sloppy_quorum, boolean()} |
+        asis.
 %% Valid request options for put requests. `return_body' returns the
 %% entire result of storing the object. `return_head' returns the
 %% metadata from the result of storing the object. `if_not_modified'

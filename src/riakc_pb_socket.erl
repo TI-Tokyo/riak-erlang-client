@@ -265,12 +265,12 @@ is_connected(Pid, Timeout) ->
 
 %% @doc Ping the server
 %% @equiv ping(Pid, default_timeout(ping_timeout))
--spec ping(pid()) -> pong|{error, timeout}.
+-spec ping(pid()) -> pong|{error, term()}.
 ping(Pid) ->
     call_infinity(Pid, {req, rpbpingreq, default_timeout(ping_timeout)}).
 
 %% @doc Ping the server specifying timeout
--spec ping(pid(), timeout()) -> pong|{error, timeout}.
+-spec ping(pid(), timeout()) -> pong|{error, term()}.
 ping(Pid, Timeout) ->
     call_infinity(Pid, {req, rpbpingreq, Timeout}).
 

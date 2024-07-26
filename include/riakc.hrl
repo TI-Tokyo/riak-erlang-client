@@ -53,9 +53,20 @@
 -type server_info() :: [server_prop()]. %% A response from the `get_server_info/1' call.
 -type bucket_prop() ::
         {n_val, pos_integer()} |
+        {r, non_neg_integer() | quorum | all} |
+        {pr, non_neg_integer() | quorum | all} |
+        {w, non_neg_integer() | quorum | all} |
+        {pw, non_neg_integer() | quorum | all} |
+        {dw, non_neg_integer() | quorum | all} |
+        {notfound_ok, boolean()} |
+        {basic_quorum, boolean()} |
         {allow_mult, boolean()} |
+        {last_write_wins, boolean()} |
         {search_index, binary()} |
         {node_confirms, non_neg_integer()} |
+        {dvv_enabled, boolean()} |
+        {datatype, counter | set | map | hll} |
+        {hll_precision, non_neg_integer()} |
         {backend, binary()}.
         %% Bucket property definitions (incomplete).
 -type bucket_props() :: [bucket_prop()]. %% Bucket properties

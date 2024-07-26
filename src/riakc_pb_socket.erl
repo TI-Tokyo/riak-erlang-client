@@ -127,9 +127,8 @@
                      {max_results, non_neg_integer() | all}.
 -type index_opts() :: [index_opt()].
 -type range_index_opt() ::
-    {return_terms, boolean()} |
-    {term_regex, binary()} |
-    {max_results, pos_integer()}.
+    {return_terms, boolean()} | return_terms |
+    {term_regex, binary()}.
 -type range_index_opts() :: [index_opt() | range_index_opt()].
 -type cs_opt() :: {timeout, timeout()} |
                   {continuation, binary()} |

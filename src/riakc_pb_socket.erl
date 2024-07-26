@@ -1253,7 +1253,9 @@ tunnel(Pid, MsgId, Pkt, Timeout) ->
     call_infinity(Pid, {req, Req, Timeout}).
 
 %% @doc increment the pre-Riak 2 counter at `bucket', `key' by `amount'
--spec counter_incr(pid(), bucket() | bucket_and_type(), key(), integer()) -> ok.
+-spec counter_incr(
+    pid(), bucket() | bucket_and_type(), key(), integer()) ->
+        ok | {error, term()}.
 counter_incr(Pid, Bucket, Key, Amount) ->
     counter_incr(Pid, Bucket, Key, Amount, []).
 
@@ -1261,8 +1263,9 @@ counter_incr(Pid, Bucket, Key, Amount) ->
 %% use the provided `write_quorum()' `Options' for the operation.
 %% A counter increment is a lot like a riak `put' so the semantics
 %% are the same for the given options.
--spec counter_incr(pid(), bucket() | bucket_and_type(), key(), integer(), [write_quorum()]) ->
-    ok | {error, term()}.
+-spec counter_incr(
+    pid(), bucket() | bucket_and_type(), key(), integer(), [write_quorum()]) ->
+        ok | {error, term()}.
 counter_incr(Pid, Bucket, Key, Amount, Options) ->
     {_, B} = maybe_bucket_type(Bucket),
     Req = counter_incr_options(Options, #rpbcounterupdatereq{bucket=B, key=Key, amount=Amount}),
@@ -1270,7 +1273,7 @@ counter_incr(Pid, Bucket, Key, Amount, Options) ->
 
 %% @doc get the current value of the pre-Riak 2 counter at `Bucket', `Key'.
 -spec counter_val(pid(), bucket() | bucket_and_type(), key()) ->
-                         {ok, integer()} | {error, notfound}.
+                         {ok, integer()} | {error, term()}.
 counter_val(Pid, Bucket, Key) ->
     counter_val(Pid, Bucket, Key, []).
 

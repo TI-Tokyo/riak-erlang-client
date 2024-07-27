@@ -366,7 +366,7 @@ fetch(Pid, QueueName, ObjectFormat)
 -spec push(pid(),
             binary(),
             [{riakc_obj:bucket(), riakc_obj:key(), riakc_obj:vclock()}]) ->
-                {error, term()}|{ok, iolist()}.
+                {error, term()}|{ok, binary()}.
 push(Pid, QueueName, BucketKeyClockList) ->
     KeysValue = lists:map(fun make_keyvalue/1, BucketKeyClockList),
     Req = #rpbpushreq{queuename = QueueName, keys_value = KeysValue},

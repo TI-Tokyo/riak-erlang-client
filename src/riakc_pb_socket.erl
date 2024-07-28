@@ -819,7 +819,7 @@ mapred_stream(Pid, Inputs, Query, ClientPid, Timeout, _CallTimeout) ->
 %%      See the MapReduce documentation for explanation of behavior.
 %% <em>This uses list_keys under the hood and so is potentially an expensive operation that should not be used in production.</em>
 %% @equiv mapred_bucket(Pid, Bucket, Query, default_timeout(mapred_bucket_timeout))
--spec mapred_bucket(Pid::pid(), Bucket::bucket(), Query::[mapred_queryterm()]) ->
+-spec mapred_bucket(Pid::pid(), Bucket::bucket()|bucket_and_type(), Query::[mapred_queryterm()]) ->
                            {ok, mapred_result()} |
                            {error, {badqterm, mapred_queryterm()}} |
                            {error, timeout} |
@@ -832,7 +832,7 @@ mapred_bucket(Pid, Bucket, Query) ->
 %%      See the MapReduce documentation for explanation of behavior.
 %% <em>This uses list_keys under the hood and so is potentially an expensive operation that should not be used in production.</em>
 %% @equiv mapred_bucket(Pid, Bucket, Query, Timeout, default_timeout(mapred_bucket_call_timeout))
--spec mapred_bucket(Pid::pid(), Bucket::bucket(), Query::[mapred_queryterm()], Timeout::timeout()) ->
+-spec mapred_bucket(Pid::pid(), Bucket::bucket()|bucket_and_type(), Query::[mapred_queryterm()], Timeout::timeout()) ->
                            {ok, mapred_result()} |
                            {error, {badqterm, mapred_queryterm()}} |
                            {error, timeout} |
@@ -844,7 +844,7 @@ mapred_bucket(Pid, Bucket, Query, Timeout) ->
 %%      across the cluster and local call timeout.
 %%      See the MapReduce documentation for explanation of behavior.
 %% <em>This uses list_keys under the hood and so is potentially an expensive operation that should not be used in production.</em>
--spec mapred_bucket(Pid::pid(), Bucket::bucket(), Query::[mapred_queryterm()],
+-spec mapred_bucket(Pid::pid(), Bucket::bucket()|bucket_and_type(), Query::[mapred_queryterm()],
                     Timeout::timeout(), CallTimeout::timeout()) ->
                            {ok, mapred_result()} |
                            {error, {badqterm, mapred_queryterm()}} |
@@ -866,7 +866,7 @@ mapred_bucket(Pid, Bucket, Query, Timeout, CallTimeout) ->
 %% ```  {ReqId::req_id(), {mapred, Phase::non_neg_integer(), mapred_result()}}
 %%      {ReqId::req_id(), done}'''
 %% @equiv     mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout, default_timeout(mapred_bucket_stream_call_timeout))
--spec mapred_bucket_stream(ConnectionPid::pid(), bucket(), [mapred_queryterm()], ClientPid::pid(), timeout()) ->
+-spec mapred_bucket_stream(ConnectionPid::pid(), bucket()|bucket_and_type(), [mapred_queryterm()], ClientPid::pid(), timeout()) ->
                                   {ok, req_id()} |
                                   {error, term()}.
 mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout) ->
@@ -881,7 +881,7 @@ mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout) ->
 %% ```  {ReqId::req_id(), {mapred, Phase::non_neg_integer(), mapred_result()}}
 %%      {ReqId::req_id(), done}'''
 %% @deprecated because `CallTimeout' is ignored
--spec mapred_bucket_stream(ConnectionPid::pid(), bucket(), [mapred_queryterm()], ClientPid::pid(), timeout(), timeout()) ->
+-spec mapred_bucket_stream(ConnectionPid::pid(), bucket()|bucket_and_type(), [mapred_queryterm()], ClientPid::pid(), timeout(), timeout()) ->
                                   {ok, req_id()} | {error, term()}.
 mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout, _CallTimeout) ->
     MapRed = [{'inputs', Bucket},
@@ -1068,7 +1068,7 @@ get_index(Pid, Bucket, Index, Key, Timeout, _CallTimeout) ->
 %%
 %% @deprecated use {@link get_index_range/5}
 %% @see get_index_range/5
--spec get_index(pid(), bucket(), binary() | secondary_index_id(), key() | integer(), key() | integer()) ->
+-spec get_index(pid(), bucket() | bucket_and_type(), binary() | secondary_index_id(), key() | integer(), key() | integer()) ->
                        {ok, index_results()} | {error, term()}.
 get_index(Pid, Bucket, Index, StartKey, EndKey) ->
     get_index_range(Pid, Bucket, Index, StartKey, EndKey).

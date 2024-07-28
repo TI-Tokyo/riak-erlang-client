@@ -72,7 +72,8 @@
         {big_vclock|old_vclock|small_vclock|young_vclock, non_neg_integer()} |
         {repl, realtime|boolean()} |
         {search, boolean()} |
-        {chash_keyfun|linkfun, {atom(), atom()}} |
+        {chash_keyfun, {atom(), atom()}} |
+        {linkfun, {modfun, atom(), atom()}} |
         {precommit|postcommit, [term()]}.
         %% Bucket property definitions (incomplete).
 -type bucket_props() :: [bucket_prop()]. %% Bucket properties

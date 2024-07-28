@@ -171,7 +171,7 @@ only_bucket(O) ->
             Bucket
     end.
 
--spec bucket_type(Object::riakc_obj()) -> bucket().
+-spec bucket_type(Object::riakc_obj()) -> bucket()|undefined.
 bucket_type(O) ->
     case O#riakc_obj.bucket of
         {Type, _Bucket} ->

@@ -58,11 +58,7 @@
 -type server_info() :: [server_prop()]. %% A response from the `get_server_info/1' call.
 -type bucket_prop() ::
         {n_val, pos_integer()} |
-        {r, non_neg_integer() | quorum | all} |
-        {pr, non_neg_integer() | quorum | all} |
-        {w, non_neg_integer() | quorum | all} |
-        {pw, non_neg_integer() | quorum | all} |
-        {dw, non_neg_integer() | quorum | all} |
+        {r|pr|w|pw|dw|rw, non_neg_integer() | quorum | all} |
         {notfound_ok, boolean()} |
         {basic_quorum, boolean()} |
         {allow_mult, boolean()} |
@@ -72,7 +68,12 @@
         {dvv_enabled, boolean()} |
         {datatype, counter | set | map | hll} |
         {hll_precision, non_neg_integer()} |
-        {backend, binary()}.
+        {backend, binary()} |
+        {big_vclock|old_vclock|small_vclock|young_vclock, non_neg_integer()} |
+        {repl, realtime|boolean()} |
+        {search, boolean()} |
+        {chash_keyfun|linkfun, {atom(), atom()}} |
+        {precommit|postcommit, [term()]}.
         %% Bucket property definitions (incomplete).
 -type bucket_props() :: [bucket_prop()]. %% Bucket properties
 -type quorum() :: non_neg_integer() | one | all | quorum | default.  %% A quorum setting for get/put/delete requests.

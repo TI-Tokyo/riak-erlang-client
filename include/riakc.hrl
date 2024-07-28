@@ -134,6 +134,9 @@
         {map, mapred_funterm(), Arg::term(), Accumulate :: boolean()} |
         {reduce, mapred_funterm(), Arg::term(),Accumulate :: boolean()} |
         {link, Bucket :: riakc_obj:bucket(), Tag :: term(), Accumulate :: boolean()}.
+-type key_filter_function_name() :: binary().
+-type key_filter_function_args() :: list(binary()).
+-type key_filter() :: [key_filter_function_name()|key_filter_function_args()].
 %% A MapReduce phase specification. `map' functions operate on single
 %% K/V objects. `reduce' functions operate across collections of
 %% inputs from other phases. `link' is a special type of map phase
@@ -161,6 +164,7 @@
 -type mapred_inputs() :: [{bucket(), key()} | {{bucket(), key()}, term()}] |
                          {modfun, Module::atom(), Function::atom(), [term()]} |
                          bucket() |
+                         {bucket(), list(key_filter())} |
                          {index, bucket(), Index::binary()|secondary_index_id(), key()|integer()} |
                          {index, bucket(), Index::binary()|secondary_index_id(), StartKey::key()|integer(), EndKey::key()|integer()}.
 %% Inputs for a MapReduce job.

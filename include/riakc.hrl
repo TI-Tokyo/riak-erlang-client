@@ -220,7 +220,7 @@
 
 -type index_results() :: #index_results_v1{} | #index_body_results_v1{}.
 
--export_type([secondary_index_id/0, index_results/0]).
+-export_type([secondary_index_id/0, index_results/0, mapred_queryterm/0]).
 
 -type index_stream_result() :: #index_stream_result_v1{} |
                                #index_stream_body_result_v1{}.

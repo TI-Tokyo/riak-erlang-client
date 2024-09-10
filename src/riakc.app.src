@@ -5,6 +5,7 @@
   {applications, [
                   kernel,
                   stdlib,
+                  ssl,
                   riak_pb
                  ]},
   {registered, []},

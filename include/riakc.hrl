@@ -27,14 +27,20 @@
 -define(FIRST_RECONNECT_INTERVAL, 100).
 -define(MAX_RECONNECT_INTERVAL, 30000).
 
--type client_option()  :: queue_if_disconnected |
-                          {queue_if_disconnected, boolean()} |
-                          {connect_timeout, pos_integer()} |
-                          auto_reconnect |
-                          {auto_reconnect, boolean()} |
-                          keepalive |
-                          {keepalive, boolean()}|
-                          {silence_terminate_crash, boolean()}.
+-type client_option() ::
+        queue_if_disconnected |
+        {queue_if_disconnected, boolean()} |
+        {connect_timeout, pos_integer()} |
+        auto_reconnect |
+        {auto_reconnect, boolean()} |
+        keepalive |
+        {keepalive, boolean()}|
+        {silence_terminate_crash, boolean()}|
+        {credentials, string()|binary(), string()|binary()} |
+        {cacertfile, string()} |
+        {certfile, string()} |
+        {keyfile, string()} |
+        {ssl_opts, list({atom(), any()})}.
 %% Options for starting or modifying the connection:
 %% `queue_if_disconnected' when present or true will cause requests to
 %% be queued while the connection is down. `auto_reconnect' when
@@ -50,27 +56,57 @@
 -type req_id() :: non_neg_integer(). %% Request identifier for streaming requests.
 -type server_prop() :: {node, binary()} | {server_version, binary()}. %% Server properties, as returned by the `get_server_info/1' call.
 -type server_info() :: [server_prop()]. %% A response from the `get_server_info/1' call.
--type bucket_prop() :: {n_val, pos_integer()} | {allow_mult, boolean()} | {search_index, binary()}. %% Bucket property definitions.
+-type bucket_prop() ::
+        {n_val, pos_integer()} |
+        {r|pr|w|pw|dw|rw, non_neg_integer() | quorum | all} |
+        {notfound_ok, boolean()} |
+        {basic_quorum, boolean()} |
+        {allow_mult, boolean()} |
+        {last_write_wins, boolean()} |
+        {search_index, binary()} |
+        {node_confirms, non_neg_integer()} |
+        {dvv_enabled, boolean()} |
+        {datatype, counter | set | map | hll} |
+        {hll_precision, non_neg_integer()} |
+        {backend, binary()} |
+        {big_vclock|old_vclock|small_vclock|young_vclock, non_neg_integer()} |
+        {repl, realtime|boolean()} |
+        {search, boolean()} |
+        {chash_keyfun, {atom(), atom()}} |
+        {linkfun, {modfun, atom(), atom()}} |
+        {precommit|postcommit, [term()]}.
+        %% Bucket property definitions (incomplete).
 -type bucket_props() :: [bucket_prop()]. %% Bucket properties
 -type quorum() :: non_neg_integer() | one | all | quorum | default.  %% A quorum setting for get/put/delete requests.
--type read_quorum() :: {r, ReadQuorum::quorum()} |
-                       {pr, PrimaryReadQuorum::quorum()}. %% Valid quorum options for get requests.
--type write_quorum() :: {w, WriteQuorum::quorum()} |
-                        {dw, DurableWriteQuorum::quorum()} |
-                        {pw, PrimaryWriteQuorum::quorum()}. %% Valid quorum options for write requests.
--type delete_option() :: delete_quorum()  |
-                      {n_val, pos_integer()} |
-                      {sloppy_quorum, boolean()}.
--type delete_quorum() :: read_quorum() |
-                         write_quorum() |
-                         {rw, ReadWriteQuorum::quorum()}. %% Valid quorum options for delete requests. Note that `rw' is deprecated in Riak 1.0 and later.
--type get_option() :: read_quorum() |
-                      {if_modified, riakc_obj:vclock()} |
-                      {notfound_ok, boolean()} |
-                      {basic_quorum, boolean()} |
-                      head | deletedvclock |
-                      {n_val, pos_integer()} |
-                      {sloppy_quorum, boolean()}.
+-type read_quorum() ::
+        {r, ReadQuorum::quorum()} |
+        {pr, PrimaryReadQuorum::quorum()}.
+        %% Valid quorum options for get requests.
+-type write_quorum() ::
+        {w, WriteQuorum::quorum()} |
+        {dw, DurableWriteQuorum::quorum()} |
+        {pw, PrimaryWriteQuorum::quorum()}.
+%% Valid quorum options for write requests.
+-type delete_option() ::
+        delete_quorum()  |
+        {n_val, pos_integer()} |
+        {timeout, pos_integer()} |
+        {sloppy_quorum, boolean()}.
+-type delete_quorum() ::
+        read_quorum() |
+        write_quorum() |
+        {rw, ReadWriteQuorum::quorum()}.
+        %% Valid quorum options for delete requests. Note that `rw' is deprecated in Riak 1.0 and later.
+-type get_option() ::
+        read_quorum() |
+        {if_modified, riakc_obj:vclock()} |
+        {notfound_ok, boolean()} |
+        {basic_quorum, boolean()} |
+        head | deletedvclock |
+        {n_val, pos_integer()} |
+        {timeout, pos_integer()} |
+        {node_confirms, non_neg_integer()} |
+        {sloppy_quorum, boolean()}.
 
 %% Valid request options for get requests. When `if_modified' is
 %% specified with a vclock, the request will fail if the object has
@@ -78,9 +114,14 @@
 %% returned. When `deletedvclock' is specified, the vector clock of
 %% the tombstone will be returned if the object has been recently
 %% deleted.
--type put_option() :: write_quorum() | return_body | return_head | if_not_modified | if_none_match |
-                      {n_val, pos_integer()} |
-                      {sloppy_quorum, boolean()}.
+-type put_option() ::
+        write_quorum() |
+        return_body | return_head | if_not_modified | if_none_match |
+        {n_val, pos_integer()} |
+        {sloppy_quorum, boolean()} |
+        {timeout, pos_integer()} |
+        {node_confirms, non_neg_integer()} |
+        asis.
 %% Valid request options for put requests. `return_body' returns the
 %% entire result of storing the object. `return_head' returns the
 %% metadata from the result of storing the object. `if_not_modified'
@@ -91,9 +132,13 @@
 -type put_options() :: [put_option()]. %% A list of options for a put request.
 -type search_options() :: [search_option()]. %% A list of options for a search request.
 -type delete_options() :: [delete_option()]. %% A list of options for a delete request.
--type mapred_queryterm() ::  {map, mapred_funterm(), Arg::term(), Accumulate :: boolean()} |
-                             {reduce, mapred_funterm(), Arg::term(),Accumulate :: boolean()} |
-                             {link, Bucket :: riakc_obj:bucket(), Tag :: term(), Accumulate :: boolean()}.
+-type mapred_queryterm() :: 
+        {map, mapred_funterm(), Arg::term(), Accumulate :: boolean()} |
+        {reduce, mapred_funterm(), Arg::term(),Accumulate :: boolean()} |
+        {link, Bucket :: riakc_obj:bucket(), Tag :: term(), Accumulate :: boolean()}.
+-type key_filter_function_name() :: binary().
+-type key_filter_function_args() :: list(binary()).
+-type key_filter() :: [key_filter_function_name()|key_filter_function_args()].
 %% A MapReduce phase specification. `map' functions operate on single
 %% K/V objects. `reduce' functions operate across collections of
 %% inputs from other phases. `link' is a special type of map phase
@@ -118,11 +163,13 @@
 %% function, that when evaluated points to a built-in javascript function.
 -type mapred_result() :: [term()].
 %% The results of a MapReduce job.
--type mapred_inputs() :: [{bucket(), key()} | {{bucket(), key()}, term()}] |
-                         {modfun, Module::atom(), Function::atom(), [term()]} |
-                         bucket() |
-                         {index, bucket(), Index::binary()|secondary_index_id(), key()|integer()} |
-                         {index, bucket(), Index::binary()|secondary_index_id(), StartKey::key()|integer(), EndKey::key()|integer()}.
+-type mapred_inputs() ::
+        [{bucket()|bucket_and_type(), key()} | {{bucket()|bucket_and_type(), key()}, term()}] |
+        {modfun, Module::atom(), Function::atom(), [term()]} |
+        bucket()|bucket_and_type() |
+        {bucket()|bucket_and_type(), list(key_filter())} |
+        {index, bucket()|bucket_and_type(), Index::binary()|secondary_index_id(), key()|integer()} |
+        {index, bucket()|bucket_and_type(), Index::binary()|secondary_index_id(), StartKey::key()|integer(), EndKey::key()|integer()}.
 %% Inputs for a MapReduce job.
 -type connection_failure() :: {Reason::term(), FailureCount::integer()}.
 %% The reason for connection failure and how many times that type of

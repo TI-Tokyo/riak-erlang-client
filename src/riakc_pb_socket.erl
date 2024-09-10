@@ -121,13 +121,14 @@
 -type search_admin_opts() :: [search_admin_opt()].
 -type index_opt() :: {timeout, timeout()} |
                      {call_timeout, timeout()} |
-                     {stream, boolean()} |
+                     {stream, boolean()} | stream |
                      {continuation, binary()} |
-                     {pagination_sort, boolean()} |
+                     {pagination_sort, boolean()} | pagination_sort |
                      {max_results, non_neg_integer() | all}.
 -type index_opts() :: [index_opt()].
--type range_index_opt() :: {return_terms, boolean()} |
-                           {term_regex, binary()}.
+-type range_index_opt() ::
+    {return_terms, boolean()} | return_terms |
+    {term_regex, binary()}.
 -type range_index_opts() :: [index_opt() | range_index_opt()].
 -type cs_opt() :: {timeout, timeout()} |
                   {continuation, binary()} |
@@ -264,12 +265,12 @@ is_connected(Pid, Timeout) ->
 
 %% @doc Ping the server
 %% @equiv ping(Pid, default_timeout(ping_timeout))
--spec ping(pid()) -> pong|{error, timeout}.
+-spec ping(pid()) -> pong|{error, term()}.
 ping(Pid) ->
     call_infinity(Pid, {req, rpbpingreq, default_timeout(ping_timeout)}).
 
 %% @doc Ping the server specifying timeout
--spec ping(pid(), timeout()) -> pong|{error, timeout}.
+-spec ping(pid(), timeout()) -> pong|{error, term()}.
 ping(Pid, Timeout) ->
     call_infinity(Pid, {req, rpbpingreq, Timeout}).
 
@@ -311,15 +312,25 @@ get_server_info(Pid, Timeout) ->
 %% @doc Get bucket/key from the server.
 %%      Will return {error, notfound} if the key is not on the server.
 %% @equiv get(Pid, Bucket, Key, [], default_timeout(get_timeout))
--spec get(pid(), bucket() | bucket_and_type(), key()) -> {ok, riakc_obj()} | {error, term()}.
+-spec get(
+    pid(), bucket() | bucket_and_type(), key()) ->
+        {ok, riakc_obj()} |
+        {error, term()} |
+        {error, notfound, riakc_obj:vclock()}.
 get(Pid, Bucket, Key) ->
     get(Pid, Bucket, Key, [], default_timeout(get_timeout)).
 
 %% @doc Get bucket/key from the server specifying timeout.
 %%      Will return {error, notfound} if the key is not on the server.
 %% @equiv get(Pid, Bucket, Key, Options, Timeout)
--spec get(pid(), bucket() | bucket_and_type(), key(), TimeoutOrOptions::timeout() |  get_options()) ->
-                 {ok, riakc_obj()} | {error, term()} | unchanged.
+-spec get(
+    pid(),
+    bucket() | bucket_and_type(),
+    key(),
+    TimeoutOrOptions::timeout() |  get_options()) ->
+        {ok, riakc_obj()} |
+        {error, term()} |
+        {error, notfound, riakc_obj:vclock()}.
 get(Pid, Bucket, Key, Timeout) when is_integer(Timeout); Timeout =:= infinity ->
     get(Pid, Bucket, Key, [], Timeout);
 get(Pid, Bucket, Key, Options) ->
@@ -329,8 +340,11 @@ get(Pid, Bucket, Key, Options) ->
 %%      <code>unchanged</code> will be returned when the
 %%      <code>{if_modified, Vclock}</code> option is specified and the
 %%      object is unchanged.
--spec get(pid(), bucket() | bucket_and_type(), key(), get_options(), timeout()) ->
-                 {ok, riakc_obj()} | {error, term()} | unchanged.
+-spec get(
+    pid(), bucket() | bucket_and_type(), key(), get_options(), timeout()) ->
+        {ok, riakc_obj()} |
+        {error, term()} |
+        {error, notfound, riakc_obj:vclock()}.
 get(Pid, Bucket, Key, Options, Timeout) ->
     {T, B} = maybe_bucket_type(Bucket),
     Req = get_options(Options, #rpbgetreq{type =T, bucket = B, key = Key}),
@@ -365,7 +379,7 @@ fetch(Pid, QueueName, ObjectFormat)
 -spec push(pid(),
             binary(),
             [{riakc_obj:bucket(), riakc_obj:key(), riakc_obj:vclock()}]) ->
-                {error, term()}|{ok, iolist()}.
+                {error, term()}|{ok, binary()}.
 push(Pid, QueueName, BucketKeyClockList) ->
     KeysValue = lists:map(fun make_keyvalue/1, BucketKeyClockList),
     Req = #rpbpushreq{queuename = QueueName, keys_value = KeysValue},
@@ -805,7 +819,7 @@ mapred_stream(Pid, Inputs, Query, ClientPid, Timeout, _CallTimeout) ->
 %%      See the MapReduce documentation for explanation of behavior.
 %% <em>This uses list_keys under the hood and so is potentially an expensive operation that should not be used in production.</em>
 %% @equiv mapred_bucket(Pid, Bucket, Query, default_timeout(mapred_bucket_timeout))
--spec mapred_bucket(Pid::pid(), Bucket::bucket(), Query::[mapred_queryterm()]) ->
+-spec mapred_bucket(Pid::pid(), Bucket::bucket()|bucket_and_type(), Query::[mapred_queryterm()]) ->
                            {ok, mapred_result()} |
                            {error, {badqterm, mapred_queryterm()}} |
                            {error, timeout} |
@@ -818,7 +832,7 @@ mapred_bucket(Pid, Bucket, Query) ->
 %%      See the MapReduce documentation for explanation of behavior.
 %% <em>This uses list_keys under the hood and so is potentially an expensive operation that should not be used in production.</em>
 %% @equiv mapred_bucket(Pid, Bucket, Query, Timeout, default_timeout(mapred_bucket_call_timeout))
--spec mapred_bucket(Pid::pid(), Bucket::bucket(), Query::[mapred_queryterm()], Timeout::timeout()) ->
+-spec mapred_bucket(Pid::pid(), Bucket::bucket()|bucket_and_type(), Query::[mapred_queryterm()], Timeout::timeout()) ->
                            {ok, mapred_result()} |
                            {error, {badqterm, mapred_queryterm()}} |
                            {error, timeout} |
@@ -830,7 +844,7 @@ mapred_bucket(Pid, Bucket, Query, Timeout) ->
 %%      across the cluster and local call timeout.
 %%      See the MapReduce documentation for explanation of behavior.
 %% <em>This uses list_keys under the hood and so is potentially an expensive operation that should not be used in production.</em>
--spec mapred_bucket(Pid::pid(), Bucket::bucket(), Query::[mapred_queryterm()],
+-spec mapred_bucket(Pid::pid(), Bucket::bucket()|bucket_and_type(), Query::[mapred_queryterm()],
                     Timeout::timeout(), CallTimeout::timeout()) ->
                            {ok, mapred_result()} |
                            {error, {badqterm, mapred_queryterm()}} |
@@ -852,7 +866,7 @@ mapred_bucket(Pid, Bucket, Query, Timeout, CallTimeout) ->
 %% ```  {ReqId::req_id(), {mapred, Phase::non_neg_integer(), mapred_result()}}
 %%      {ReqId::req_id(), done}'''
 %% @equiv     mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout, default_timeout(mapred_bucket_stream_call_timeout))
--spec mapred_bucket_stream(ConnectionPid::pid(), bucket(), [mapred_queryterm()], ClientPid::pid(), timeout()) ->
+-spec mapred_bucket_stream(ConnectionPid::pid(), bucket()|bucket_and_type(), [mapred_queryterm()], ClientPid::pid(), timeout()) ->
                                   {ok, req_id()} |
                                   {error, term()}.
 mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout) ->
@@ -867,7 +881,7 @@ mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout) ->
 %% ```  {ReqId::req_id(), {mapred, Phase::non_neg_integer(), mapred_result()}}
 %%      {ReqId::req_id(), done}'''
 %% @deprecated because `CallTimeout' is ignored
--spec mapred_bucket_stream(ConnectionPid::pid(), bucket(), [mapred_queryterm()], ClientPid::pid(), timeout(), timeout()) ->
+-spec mapred_bucket_stream(ConnectionPid::pid(), bucket()|bucket_and_type(), [mapred_queryterm()], ClientPid::pid(), timeout(), timeout()) ->
                                   {ok, req_id()} | {error, term()}.
 mapred_bucket_stream(Pid, Bucket, Query, ClientPid, Timeout, _CallTimeout) ->
     MapRed = [{'inputs', Bucket},
@@ -1054,7 +1068,7 @@ get_index(Pid, Bucket, Index, Key, Timeout, _CallTimeout) ->
 %%
 %% @deprecated use {@link get_index_range/5}
 %% @see get_index_range/5
--spec get_index(pid(), bucket(), binary() | secondary_index_id(), key() | integer(), key() | integer()) ->
+-spec get_index(pid(), bucket() | bucket_and_type(), binary() | secondary_index_id(), key() | integer(), key() | integer()) ->
                        {ok, index_results()} | {error, term()}.
 get_index(Pid, Bucket, Index, StartKey, EndKey) ->
     get_index_range(Pid, Bucket, Index, StartKey, EndKey).
@@ -1252,7 +1266,9 @@ tunnel(Pid, MsgId, Pkt, Timeout) ->
     call_infinity(Pid, {req, Req, Timeout}).
 
 %% @doc increment the pre-Riak 2 counter at `bucket', `key' by `amount'
--spec counter_incr(pid(), bucket() | bucket_and_type(), key(), integer()) -> ok.
+-spec counter_incr(
+    pid(), bucket() | bucket_and_type(), key(), integer()) ->
+        ok | {error, term()}.
 counter_incr(Pid, Bucket, Key, Amount) ->
     counter_incr(Pid, Bucket, Key, Amount, []).
 
@@ -1260,8 +1276,9 @@ counter_incr(Pid, Bucket, Key, Amount) ->
 %% use the provided `write_quorum()' `Options' for the operation.
 %% A counter increment is a lot like a riak `put' so the semantics
 %% are the same for the given options.
--spec counter_incr(pid(), bucket() | bucket_and_type(), key(), integer(), [write_quorum()]) ->
-    ok | {error, term()}.
+-spec counter_incr(
+    pid(), bucket() | bucket_and_type(), key(), integer(), [write_quorum()]) ->
+        ok | {error, term()}.
 counter_incr(Pid, Bucket, Key, Amount, Options) ->
     {_, B} = maybe_bucket_type(Bucket),
     Req = counter_incr_options(Options, #rpbcounterupdatereq{bucket=B, key=Key, amount=Amount}),
@@ -1269,7 +1286,7 @@ counter_incr(Pid, Bucket, Key, Amount, Options) ->
 
 %% @doc get the current value of the pre-Riak 2 counter at `Bucket', `Key'.
 -spec counter_val(pid(), bucket() | bucket_and_type(), key()) ->
-                         {ok, integer()} | {error, notfound}.
+                         {ok, integer()} | {error, term()}.
 counter_val(Pid, Bucket, Key) ->
     counter_val(Pid, Bucket, Key, []).
 
@@ -1978,11 +1995,19 @@ aae_erase_keys(Pid,
 %% only), this query would not detect that state. For `object_size' it
 %% means return all keys whose object size is greater than `N'. The
 %% result is a list of pairs `{Key, Count | Size}'
--spec aae_object_stats(pid(),
-                        riakc_obj:bucket(), key_range(),
-                        modified_range()) ->
-                            {ok, {stats, list({Key::atom(), Val::atom() | list()})}} |
-                            {error, any()}.
+-spec aae_object_stats(
+    pid(),
+    riakc_obj:bucket(), key_range(),
+    modified_range()) ->
+        {ok,
+            {stats,
+                list(
+                    {Key::binary(),
+                    Val::non_neg_integer() |
+                        list({Key::binary(), Val::non_neg_integer()})})
+                }
+            } |
+        {error, any()}.
 aae_object_stats(Pid, BucketType, KeyRange, ModifiedRange) ->
     Timeout = default_timeout(aaefold_timeout),
     {KR, SK, EK} =

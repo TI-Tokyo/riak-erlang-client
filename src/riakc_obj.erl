@@ -171,7 +171,7 @@ only_bucket(O) ->
             Bucket
     end.
 
--spec bucket_type(Object::riakc_obj()) -> bucket().
+-spec bucket_type(Object::riakc_obj()) -> bucket()|undefined.
 bucket_type(O) ->
     case O#riakc_obj.bucket of
         {Type, _Bucket} ->
@@ -608,7 +608,7 @@ set_link(MD, [{T, IdList} | Rest]) ->
     end.
 
 %% @doc  Add links for a specific tag
--spec add_link(metadata(), secondary_index() | [secondary_index()]) -> metadata().
+-spec add_link(metadata(), link() | [link()]) -> metadata().
 add_link(MD, []) ->
     MD;
 add_link(MD, Link) when is_tuple(Link) ->

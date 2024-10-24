@@ -5,7 +5,7 @@ This document assumes that you have already started your Riak cluster. For instr
 Build Status
 ============
 
-[![Build Status](https://github.com/basho/riak-erlang-client/actions/workflows/erlang.yml/badge.svg?branch=develop-3.0)](https://github.com/basho/riak-erlang-client/actions)
+![Riak Erlang Client OpenRiak Status](https://github.com/OpenRiak/riak-erlang-client/actions/workflows/erlang.yml/badge.svg?branch=openriak-3.4)
 
 Dependencies
 ============
